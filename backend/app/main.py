@@ -13,7 +13,7 @@ from sqlmodel import Session, SQLModel, create_engine, select
 from .juz import juz_for_day, juz_name
 from .models import (
     CATEGORIES, DayNote, LogCreate, NoteUpdate, PrayerDay, PrayerUpdate,
-    TimeLog, Todo, TodoCreate, TodoUpdate,
+    TimeLog, Todo, TodoCreate, TodoUpdate, WaterDay, WaterUpdate,
 )
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./planner.db")
@@ -225,6 +225,43 @@ def delete_log(log_id: int, session: Session = Depends(get_session)):
 @app.get("/api/categories")
 def categories():
     return [{"key": k, "productive": v} for k, v in CATEGORIES.items()]
+
+
+# ---------------------------------------------------------------- water
+def default_goal(session: Session) -> int:
+    """Days with no record use the most recently set goal (8 glasses if none)."""
+    last = session.exec(select(WaterDay).order_by(WaterDay.date.desc())).first()
+    return last.goal if last else 8
+
+
+def water_out(session: Session, d: str, row: WaterDay | None) -> dict:
+    return {"date": d, "glasses": row.glasses if row else 0, "goal": row.goal if row else default_goal(session)}
+
+
+@app.get("/api/water")
+def get_water(date: str, session: Session = Depends(get_session)):
+    parse_date(date)
+    return water_out(session, date, session.get(WaterDay, date))
+
+
+@app.put("/api/water/{date}")
+def update_water(date: str, body: WaterUpdate, session: Session = Depends(get_session)):
+    parse_date(date)
+    row = session.get(WaterDay, date) or WaterDay(date=date, goal=default_goal(session))
+    for k, v in body.model_dump(exclude_none=True).items():
+        setattr(row, k, v)
+    session.add(row)
+    session.commit()
+    session.refresh(row)
+    return water_out(session, date, row)
+
+
+@app.get("/api/water/range")
+def water_range(end: str, days: int = Query(14, ge=1, le=90), session: Session = Depends(get_session)):
+    e = parse_date(end)
+    dates = [(e - timedelta(days=i)).isoformat() for i in range(days - 1, -1, -1)]
+    rows = {r.date: r for r in session.exec(select(WaterDay).where(WaterDay.date >= dates[0], WaterDay.date <= dates[-1])).all()}
+    return [water_out(session, d, rows.get(d)) for d in dates]
 
 
 # ---------------------------------------------------------------- summaries & notes

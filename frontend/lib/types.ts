@@ -71,3 +71,9 @@ export const CATEGORIES: Record<string, { label: string; color: string }> = {
   wasted: { label: "Unproductive", color: "#b8433a" },
   other: { label: "Other", color: "#a39a7e" },
 };
+
+export interface WaterDay {
+  date: string;
+  glasses: number;
+  goal: number;
+}

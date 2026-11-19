@@ -2,9 +2,10 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import PrayerPanel from "@/components/PrayerPanel";
+import WaterCard from "@/components/WaterCard";
 import { api } from "@/lib/api";
 import { fmtMinutes, monthOf, prettyDate, today } from "@/lib/dates";
-import type { DaySummary, PrayerDay, PrayerKey, Todo } from "@/lib/types";
+import type { DaySummary, PrayerDay, PrayerKey, Todo, WaterDay } from "@/lib/types";
 import { useErrors } from "@/lib/useAction";
 
 export default function TodayPage() {
@@ -13,13 +14,15 @@ export default function TodayPage() {
   const [day, setDay] = useState<PrayerDay | null>(null);
   const [todos, setTodos] = useState<Todo[]>([]);
   const [summary, setSummary] = useState<DaySummary | null>(null);
+  const [water, setWater] = useState<WaterDay | null>(null);
 
   const load = useCallback(async () => {
     await run(async () => {
-      const [m, td, s] = await Promise.all([api.month(monthOf(t)), api.todos(), api.daySummary(t)]);
+      const [m, td, s, w] = await Promise.all([api.month(monthOf(t)), api.todos(), api.daySummary(t), api.water(t)]);
       setDay(m.days.find((d) => d.date === t) ?? null);
       setTodos(td);
       setSummary(s);
+      setWater(w);
     });
   }, [run, t]);
 
@@ -29,6 +32,9 @@ export default function TodayPage() {
 
   const togglePrayer = (key: PrayerKey | "quran", value: boolean) =>
     run(async () => setDay(await api.updatePrayer(t, { [key]: value })));
+
+  const updateWater = (patch: { glasses?: number; goal?: number }) =>
+    run(async () => setWater(await api.updateWater(t, patch)));
 
   const completeTodo = (id: number) =>
     run(async () => {
@@ -60,6 +66,11 @@ export default function TodayPage() {
           <h2>Today&apos;s namaz</h2>
           {day ? <PrayerPanel day={day} onToggle={togglePrayer} /> : <div className="empty-note">Loading…</div>}
         </div>
+        <div>
+        <div className="card">
+          <h2>Water</h2>
+          {water ? <WaterCard day={water} onChange={updateWater} /> : <div className="empty-note">Loading…</div>}
+        </div>
         <div className="card">
           <h2>Next tasks</h2>
           {pending.slice(0, 5).map((x) => (
@@ -76,6 +87,7 @@ export default function TodayPage() {
             <Link className="btn ghost sm" href="/todos">Open to-do list</Link>
             <Link className="btn ghost sm" href="/time">Log my time</Link>
           </div>
+        </div>
         </div>
       </div>
     </>

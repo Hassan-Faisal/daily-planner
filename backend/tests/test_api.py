@@ -89,3 +89,19 @@ def test_log_past_midnight_and_validation(client):
     assert client.post("/api/logs", json=bad).status_code == 422
     bad["start"], bad["category"] = "10:00", "nope"
     assert client.post("/api/logs", json=bad).status_code == 422
+
+
+def test_water_tracking(client):
+    day = "2026-11-19"
+    assert client.get("/api/water", params={"date": day}).json()["glasses"] == 0
+    r = client.put(f"/api/water/{day}", json={"glasses": 3}).json()
+    assert r["glasses"] == 3 and r["goal"] == 8
+    r = client.put(f"/api/water/{day}", json={"glasses": 5, "goal": 10}).json()
+    assert r["glasses"] == 5 and r["goal"] == 10
+    # a day with no record inherits the latest goal
+    assert client.get("/api/water", params={"date": "2026-11-25"}).json()["goal"] == 10
+    rng = client.get("/api/water/range", params={"end": day, "days": 7}).json()
+    assert len(rng) == 7 and rng[-1]["glasses"] == 5 and rng[0]["glasses"] == 0
+    assert client.put(f"/api/water/{day}", json={"glasses": -1}).status_code == 422
+    assert client.put(f"/api/water/{day}", json={"goal": 0}).status_code == 422
+    assert client.put("/api/water/bad-date", json={"glasses": 1}).status_code == 422

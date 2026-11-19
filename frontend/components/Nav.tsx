@@ -6,6 +6,7 @@ const TABS = [
   { href: "/", label: "Today" },
   { href: "/namaz", label: "Namaz & Quran" },
   { href: "/todos", label: "To-do" },
+  { href: "/water", label: "Water" },
   { href: "/time", label: "Time log" },
 ];
 

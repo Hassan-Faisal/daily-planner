@@ -1,4 +1,4 @@
-import type { DaySummary, MonthData, PrayerDay, PrayerKey, TimeLog, Todo } from "./types";
+import type { DaySummary, MonthData, PrayerDay, PrayerKey, TimeLog, Todo, WaterDay } from "./types";
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let res: Response;
@@ -39,6 +39,12 @@ export const api = {
   updateTodo: (id: number, patch: Partial<Pick<Todo, "title" | "due" | "done" | "review">>) =>
     request<Todo>(`/todos/${id}`, json("PATCH", patch)),
   deleteTodo: (id: number) => request<void>(`/todos/${id}`, { method: "DELETE" }),
+
+  // water
+  water: (date: string) => request<WaterDay>(`/water?date=${date}`),
+  updateWater: (date: string, patch: { glasses?: number; goal?: number }) =>
+    request<WaterDay>(`/water/${date}`, json("PUT", patch)),
+  waterRange: (end: string, days = 14) => request<WaterDay[]>(`/water/range?end=${end}&days=${days}`),
 
   // time log
   logs: (date: string) => request<TimeLog[]>(`/logs?date=${date}`),

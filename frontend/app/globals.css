@@ -81,3 +81,20 @@ textarea{width:100%;resize:vertical;min-height:56px}
 .meter div{height:8px;border-radius:4px;background:var(--green)}
 .mnav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .mnav b{font-size:17px}
+.water-top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.water-count{font-size:30px;color:#2d6fa3}
+.badge.good{background:var(--green2);color:var(--green)}
+.meter.big,.meter.big div{height:12px;border-radius:6px}
+.meter.big div{background:#4f9fd6}
+.glasses{display:flex;flex-wrap:wrap;gap:4px;margin:12px 0}
+.glass{border:0;background:transparent;font-size:26px;cursor:pointer;opacity:.25;padding:2px;filter:grayscale(1)}
+.glass.on{opacity:1;filter:none}
+.goal{margin-top:4px}
+.bars{display:flex;gap:4px;align-items:flex-end;height:170px}
+.barcol{flex:1;display:flex;flex-direction:column;align-items:center;height:100%;min-width:0}
+.barval{font-size:11px;height:14px;color:var(--mute)}
+.bartrack{position:relative;flex:1;width:100%;display:flex;align-items:flex-end;background:#f3ecdb;border-radius:6px 6px 0 0}
+.barfill{width:100%;background:#4f9fd6;border-radius:6px 6px 0 0;min-height:0}
+.barfill.met{background:var(--green)}
+.goalline{position:absolute;left:0;right:0;border-top:2px dashed var(--gold)}
+.barlbl{font-size:11px;color:var(--mute);margin-top:3px}

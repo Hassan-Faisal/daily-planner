@@ -47,6 +47,12 @@ class TimeLog(SQLModel, table=True):
     category: str = "other"
 
 
+class WaterDay(SQLModel, table=True):
+    date: str = Field(primary_key=True)
+    glasses: int = 0
+    goal: int = 8
+
+
 class DayNote(SQLModel, table=True):
     date: str = Field(primary_key=True)
     rating: int = 0  # 0 = not rated, 1..5
@@ -81,6 +87,11 @@ class LogCreate(BaseModel):
     end: str
     what: str = PField(min_length=1, max_length=300)
     category: str = "other"
+
+
+class WaterUpdate(BaseModel):
+    glasses: Optional[int] = PField(default=None, ge=0, le=50)
+    goal: Optional[int] = PField(default=None, ge=1, le=50)
 
 
 class NoteUpdate(BaseModel):
